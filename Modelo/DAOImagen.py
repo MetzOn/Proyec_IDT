@@ -1,34 +1,36 @@
 ##FALTA EDITAR TODOOOOOOOOO
+from ConexionBD import Conexion
+from DTOImagen import ImagenDTO
+from DTOEmpleado import EmpleadoDTO
+import cv2
+import numpy as np
 
 class Imagen:
     def __init__(self):
         self.conexion_manager=Conexion()
         
-        
-    def insertarDatosImagen(self,imag):
+    def CrearImagenes(self,imag):
         con=None
         cursor=None
-        if isinstance(imag, Imagen):
+        if isinstance(imag, ImagenDTO):
             
-            nombre=imag.get_nombreI()
-            contenido=imag.get_contenidoI()
-            Id_Sospechoso= imag.get_idSIma()
-            
-            
-            
+            nombre=imag.getNombreI
+            contenido=imag.getContenidoI
+            id_empleado= imag.getIdE
+
         try:
             con=self.conexion_manager.conectar()
             con.autocommit=False
             cursor=con.cursor()
-            sql="INSERT INTO imagen (nombre_i, contenido_i, id_s) VALUES (%s, %s, %s)"
-            cursor.execute(sql, (nombre, contenido, Id_Sospechoso))
+            sql="INSERT INTO imagenes (IdEmpleado,nombreI,Imagen) VALUES (%s, %s, %s)"
+            cursor.execute(sql, (id_empleado,nombre, contenido))
             con.commit()
         except Exception as e:
             print(f'Error al agregar Imagen: {e}')
         finally:
             self.conexion_manager.desconectar(con, cursor)
-            
-            
+
+
     def eliminarImagenesID(self,id):
         con=None
         cursor=None
@@ -37,7 +39,7 @@ class Imagen:
             con=self.conexion_manager.conectar()
             con.autocommit=False
             cursor=con.cursor()
-            sql='''DELETE FROM imagen WHERE id_i='{}' '''.format(id)
+            sql='''DELETE FROM imagenes WHERE IdImagen='{}' '''.format(id)
             resp=cursor.execute(sql)
             con.commit()
             return resp
@@ -47,38 +49,40 @@ class Imagen:
         finally:
             self.conexion_manager.desconectar(con, cursor)
             
-    def eliminarImagenesIDSOS(self,sospechoso):
+    def eliminarImagenesIDEmpleado(self,Empleado):
         con=None
         cursor=None
-        if isinstance(sospechoso, Sospechoso):
-            idSosp=sospechoso.get_idS()
+        if isinstance(Empleado, EmpleadoDTO):
+            idEmpl=Empleado.getIdE()
  
         try:
             con=self.conexion_manager.conectar()
             con.autocommit=False
             cursor=con.cursor()
-            sql='''DELETE FROM imagen WHERE id_s='{}' '''.format(idSosp)
+            sql='''DELETE FROM imagenes WHERE IdEmpleado='{}' '''.format(idEmpl)
             cursor.execute(sql)
             con.commit()
         except Exception as e:
             print(f'Error al Eliminar Imagenes: {e}')
         finally:
             self.conexion_manager.desconectar(con, cursor)
-    def mostrarImagenesPorIDSos(self,idPIm):
+
+    def mostrarImagenesPorIDEmpl(self,idEmpl):
         con=None
         cursor=None
         ImagenesxID = []
         try:
             con=self.conexion_manager.conectar()
             cursor=con.cursor()
-            sql='''SELECT * FROM imagen WHERE id_s='{}' '''.format(idPIm)
+            sql='''SELECT * FROM imagenes WHERE IdEmpleado='{}' '''.format(idEmpl)
             cursor.execute(sql)
             datos= cursor.fetchall()
             for tupla in datos:
                 id=tupla[0]
-                nombre = tupla[1]
-                contenido=tupla[2]
-                ImagenM = Imagen(id,nombre,contenido,idPIm)
+                idE=tupla[1]
+                nombre = tupla[2]
+                contenido=tupla[3]
+                ImagenM = ImagenDTO(id,idE,nombre,contenido)
                 ImagenesxID.append(ImagenM)
             return ImagenesxID
         except Exception as e:
@@ -93,7 +97,7 @@ class Imagen:
         try:
             con=self.conexion_manager.conectar()
             cursor=con.cursor()
-            sql='''SELECT contenido_i FROM imagen WHERE id_i='{}' '''.format(idImagen)
+            sql='''SELECT Imagen FROM imagenes WHERE IdImagen='{}' '''.format(idImagen)
             cursor.execute(sql)
             contenido_i =cursor.fetchone()
             if contenido_i:

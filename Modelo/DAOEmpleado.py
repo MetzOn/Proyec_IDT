@@ -4,8 +4,6 @@ from DTOEmpleado import EmpleadoDTO
 class EmpleadoDAO():
     def __init__(self):
         self.conexion_manager=Conexion()
-
-
         
     def CreateEmpleado(self,empleado):
         resp = False
