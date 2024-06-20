@@ -10,9 +10,9 @@ class HistorialDao:
         con=None
         cursor=None
         if isinstance(historial, HistorialDTO):
-            idE=historial.getIdE
-            fechaH=historial.getFechaH
-            hora=historial.getHoraH
+            idE=historial.getIdE()
+            fechaH=historial.getFechaH()
+            hora=historial.getHoraH()
             
             try:
                 con=self.conexion_manager.conectar()

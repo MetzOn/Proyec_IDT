@@ -6,7 +6,7 @@ class AlertaDTO():
 
     def getIdA(self):
         return self.idA
-    def setIdE(self,idA):
+    def setIdA(self,idA):
         self.idA=idA
       
     def getIdH(self):

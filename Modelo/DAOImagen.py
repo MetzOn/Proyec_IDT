@@ -1,4 +1,4 @@
-##FALTA EDITAR TODOOOOOOOOO
+
 from ConexionBD import Conexion
 from DTOImagen import ImagenDTO
 from DTOEmpleado import EmpleadoDTO
