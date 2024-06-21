@@ -34,31 +34,135 @@ class PrincipalGUI(ft.UserControl):
                                 font_family="Arial"))
         self.direccion_principal=[self.direccion1,self.direccion2,self.direccion3]
         #Componentes: 
-            #Para el video
+
+        #Para el video
         self.Imagen_video=ft.Image( src=False, width="100%", height="100%")
-            #TextField para el Registro de empleados
-        self.tfNombreEmpleado=ft.TextField(hint_text="Ingrese su nombre",label="Nombres"
-        )
-        self.tfApellidosEmpleado=ft.TextField(hint_text="Ingrese su apellido",label="Apellidos")
+        self.Imagen_Captura=ft.Image(src=False,width="100%")
 
-        self.tfIdEmpleado=ft.TextField(hint_text="ID: Se genera Automaticamente",disabled=True)
-
-        self.tfDniEmpleado=ft.TextField(hint_text="Ingrese su DNI",max_length=8,keyboard_type=ft.KeyboardType.NUMBER,label="DNI")
-
-        self.tfTelefonoEmpleado=ft.TextField(hint_text="Ingrese su teléfono",
-        max_length=9,  # Asumiendo que el teléfono tiene 10 dígitos
-        keyboard_type=ft.KeyboardType.PHONE,label="Telefono")
-
-        self.tfTipoEmpleado=ft.Dropdown(
-        label="Tipo de Empleado",
-        hint_text="Seleccione el tipo de empleado",
+        #TextField para el Registro de empleados
+        self.tfNombreEmpleado=ft.TextField(hint_text="Ingrese su nombre",label="Nombres", height=40)
+        self.tfApellidosEmpleado=ft.TextField(hint_text="Ingrese su apellido",label="Apellidos", height=40)
+        self.tfIdEmpleado=ft.TextField(hint_text="ID: Se genera Automaticamente",disabled=True, height=40 )
+        self.tfDniEmpleado=ft.TextField(hint_text="Ingrese su DNI",max_length=8,keyboard_type=ft.KeyboardType.NUMBER,label="DNI", height=50 )
+        self.tfTelefonoEmpleado=ft.TextField(hint_text="Ingrese su teléfono",max_length=9,keyboard_type=ft.KeyboardType.PHONE,label="Telefono",height=50)
+        self.tfTipoEmpleado=ft.Dropdown(label="Tipo de Empleado",hint_text="Seleccione el tipo de empleado",height=40,
         options=[
             ft.dropdown.Option(key="A", text="Administrador"),
             ft.dropdown.Option(key="B", text="Empleado")
             ]
         )
-        self.tfPermiso=
+        self.PermisoDIngreso=ft.Dropdown(label="Permiso de ingreso", height=40 ,hint_text="Seleccione el tipo de permiso",
+            options=[
+            ft.dropdown.Option(key="1", text="Permitido"),
+            ft.dropdown.Option(key="0", text="No permitido")
+            ]
+        )
 
+        #BOTONES
+        #Registro-Agregar nuevo empleado
+        self.btnCrearEmpleado=ft.ElevatedButton(icon=ft.icons.SUPERVISED_USER_CIRCLE_ROUNDED,text="Crear Perfil")
+        #Registro-AdministrarEmpleados
+        self.btnModificarEmpleado=ft.ElevatedButton(icon=ft.icons.UPDATE,text="Actualizar",col={'md': 6, 'lg': 3},)
+        self.btnEliminarEmpleado=ft.ElevatedButton(icon=ft.icons.DELETE,text="Eliminar",col={'md': 6, 'lg': 3},)
+
+        #TABLA
+        #Registro-AdministrarEmpleados
+        self.tbRegistroEmpleados=ft.DataTable(
+            expand=True,
+            border= ft.border.all(2,self.ColorFondoA),
+            data_row_color={ft.MaterialState.SELECTED:"purple",
+                            ft.MaterialState.PRESSED:"black"},
+            border_radius=10,
+            show_checkbox_column=True,
+            columns=[
+                ft.DataColumn(ft.Text("ID",color=self.ColorFondoA,weight="bold")),
+                ft.DataColumn(ft.Text("Nombre",color=self.ColorFondoA,weight="bold")),
+                ft.DataColumn(ft.Text("Apellido",color=self.ColorFondoA,weight="bold")),
+                ft.DataColumn(ft.Text("DNI",color=self.ColorFondoA,weight="bold")),
+                ft.DataColumn(ft.Text("Fecha Registro",color=self.ColorFondoA,weight="bold")),
+                ft.DataColumn(ft.Text("Telefono",color=self.ColorFondoA,weight="bold")),
+                ft.DataColumn(ft.Text("Tipo",color=self.ColorFondoA,weight="bold")),
+                ft.DataColumn(ft.Text("Permiso",color=self.ColorFondoA,weight="bold")),
+            ]
+        )
+        #SUBCONTENEDORES (REGISTRO):
+        self.CtTomarImagenes=ft.Container(expand=True,alignment=ft.alignment.center, 
+            content=ft.Column(
+                expand=True,
+                controls=[
+                    ft.Container(
+                        alignment=ft.alignment.center,
+                        content=ft.ElevatedButton(
+                            icon=ft.icons.PHOTO_CAMERA,
+                            text="Tomar imagenes",
+                            col={'md': 6, 'lg': 3}
+
+                        )
+                    ),
+                    ft.Container(
+                        alignment=ft.alignment.center,
+                        expand=True,
+                        content=self.Imagen_Captura
+                    ),
+                    ft.Container(
+                        alignment=ft.alignment.bottom_right,
+                        content=self.btnCrearEmpleado
+
+                    )
+                                                    
+                ]
+            )
+        )
+        self.CtAdministarDatos=ft.Container(
+            expand=True,alignment=ft.alignment.center, 
+            content=ft.Column(
+                expand=True,
+                controls=[
+                    ft.Container(
+                        alignment=ft.alignment.center,
+                        content=ft.Text(value="TABLA",style=ft.TextStyle(
+                                color=ft.colors.WHITE,
+                                size=18,
+                                weight=ft.FontWeight.W_500,
+                                font_family="Arial"))
+                    ),
+                    ft.Column(
+                        expand=True,
+                        scroll="auto",
+                        controls=[
+                            ft.ResponsiveRow(
+                                controls=[
+                                    self.tbRegistroEmpleados
+                                    ]
+                            )
+                            
+                        ]
+                    ),
+                    ft.Container(
+                        alignment=ft.alignment.center,
+                        content=ft.ResponsiveRow(
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            controls=[
+                                self.btnModificarEmpleado,
+                                self.btnEliminarEmpleado
+                            ]
+                        )
+                    ),
+                ]
+            )
+
+        )
+
+        #Se crean las Listas para navegar entre contenedores
+        self.ContenedoresResgistro=[self.CtTomarImagenes,self.CtAdministarDatos]
+        ###################################################
+        ################################################
+        #ME QUEDE EN BUSCAR QUE LA PARTE 4 DEL DISEÑO ABARQUE MAS ESPACIO, ANTES DE SALIR, MI IDEA ES QUE MIENTRAS PONGA MAS COSAS, SOLO SE VA A AUTOAJUSTAR
+        self.ContenedorRegistro= ft.Container(
+            expand=True,
+            col=11,
+            content=self.ContenedoresResgistro[1],
+        )
         #Paneles (implementacion de componentes)
         self.Navegacion= ft.Container(#Se crea el container par apoder ponerle cosas dentro 
 
@@ -109,7 +213,7 @@ class PrincipalGUI(ft.UserControl):
 
         )
         
-#AQUI ESTOY
+#SE DEFINEN LOS CONTENEDORES PRINCIPALES
         self.Contenedor_Inicial_Home=ft.Container(
             expand= True,
             border_radius= 10,
@@ -243,12 +347,12 @@ class PrincipalGUI(ft.UserControl):
                         )
                     ),
                     ft.Container(
-                        expand=True,
+                        height=200,
                         content=ft.ResponsiveRow(
                             alignment=ft.MainAxisAlignment.CENTER,
-                            expand=True,
                             controls=[
                                 ft.Column(
+                                    
                                             col={'md': 11, 'lg': 5},
                                             controls=[
                                                 self.tfIdEmpleado,
@@ -261,7 +365,27 @@ class PrincipalGUI(ft.UserControl):
                                             controls=[
                                                 self.tfDniEmpleado,
                                                 self.tfTelefonoEmpleado,
-                                                self.tfTipoEmpleado
+                                                ft.ResponsiveRow(
+                                                    alignment=ft.MainAxisAlignment.CENTER,
+                                                    expand=True,
+                                                    controls=[
+                                                        ft.Column(
+                                                            col={'md': 3, 'lg':6 },
+                                                            controls=[
+                                                                self.tfTipoEmpleado
+                                                            ]
+                                                        ),
+                                                        ft.Column(
+                                                            col={'md': 3, 'lg':6 },
+                                                            controls=[
+                                                                self.PermisoDIngreso
+
+                                                            ]
+                                                            
+                                                        ),
+                                                    ]
+                                                ),
+                                                
                                             ]
                                         )
                                 
@@ -269,27 +393,25 @@ class PrincipalGUI(ft.UserControl):
 
                         )
                     ),
-                    ft.Container(),
+                    self.ContenedorRegistro,
                 ]
             )
 
         )
+
+
+        
+        #Se crean las Listas para navegar entre contenedores
+        self.ContenedoresPrincipales=[self.Contenedor_Inicial_Home,self.Contenedor_Inicial_Registro]
+        
+
+        
        
-       
-       
-       
-       
-       
-       
+
         self.Paneles= ft.Container(
             expand=True,
             col=11,
-            content=ft.Column(
-                controls=[
-                    self.Contenedor_Inicial_Registro
-                ]
-                
-            )
+            content=self.ContenedoresPrincipales[1],
         )
 
         self.Contenido= ft.ResponsiveRow(
@@ -305,7 +427,7 @@ class PrincipalGUI(ft.UserControl):
 
 def main(page: ft.Page):
     page.window_min_height=820
-    page.window_min_width=530
+    page.window_min_width=1100
     page.theme_mode=ft.ThemeMode.SYSTEM
     page.add(PrincipalGUI(page))
 
