@@ -45,13 +45,13 @@ class PrincipalGUI(ft.UserControl):
         self.tfIdEmpleado=ft.TextField(hint_text="ID: Se genera Automaticamente",disabled=True, height=40 )
         self.tfDniEmpleado=ft.TextField(hint_text="Ingrese su DNI",max_length=8,keyboard_type=ft.KeyboardType.NUMBER,label="DNI", height=50 )
         self.tfTelefonoEmpleado=ft.TextField(hint_text="Ingrese su teléfono",max_length=9,keyboard_type=ft.KeyboardType.PHONE,label="Telefono",height=50)
-        self.tfTipoEmpleado=ft.Dropdown(label="Tipo de Empleado",hint_text="Seleccione el tipo de empleado",height=40,
+        self.cbTipoEmpleado=ft.Dropdown(label="Tipo de Empleado",hint_text="Seleccione el tipo de empleado",height=40,
         options=[
             ft.dropdown.Option(key="A", text="Administrador"),
             ft.dropdown.Option(key="B", text="Empleado")
             ]
         )
-        self.PermisoDIngreso=ft.Dropdown(label="Permiso de ingreso", height=40 ,hint_text="Seleccione el tipo de permiso",
+        self.cbPermisoDIngreso=ft.Dropdown(label="Permiso de ingreso", height=40 ,hint_text="Seleccione el tipo de permiso",
             options=[
             ft.dropdown.Option(key="1", text="Permitido"),
             ft.dropdown.Option(key="0", text="No permitido")
@@ -59,9 +59,17 @@ class PrincipalGUI(ft.UserControl):
         )
 
         #BOTONES
+        #BarNavegacion
+        self.btnIconSalir=ft.IconButton(icon=ft.icons.OUTPUT)
+        #Home- Reconocimeinto
+        self.btnIniciarReconocimiento=ft.ElevatedButton(text="INICIAR") 
+        self.btnFinalizarVideo=ft.ElevatedButton(text="FINALIZAR")    
         #Registro-Agregar nuevo empleado
+        self.btnAgregarEmpleadoPanel=ft.ElevatedButton(expand=True,icon=ft.icons.GROUP_ADD,text="Agregar nuevo empleado",col={'md': 6, 'lg': 3},)                                
         self.btnCrearEmpleado=ft.ElevatedButton(icon=ft.icons.SUPERVISED_USER_CIRCLE_ROUNDED,text="Crear Perfil")
+        self.btnTomarImagenes=ft.ElevatedButton(icon=ft.icons.PHOTO_CAMERA,text="Tomar imagenes",col={'md': 6, 'lg': 3})
         #Registro-AdministrarEmpleados
+        self.btnAdministrarEmpleadosPanel=ft.ElevatedButton(icon=ft.icons.TABLE_VIEW,text="Administrar empleados",col={'md': 6, 'lg': 3})
         self.btnModificarEmpleado=ft.ElevatedButton(icon=ft.icons.UPDATE,text="Actualizar",col={'md': 6, 'lg': 3},)
         self.btnEliminarEmpleado=ft.ElevatedButton(icon=ft.icons.DELETE,text="Eliminar",col={'md': 6, 'lg': 3},)
 
@@ -92,12 +100,7 @@ class PrincipalGUI(ft.UserControl):
                 controls=[
                     ft.Container(
                         alignment=ft.alignment.center,
-                        content=ft.ElevatedButton(
-                            icon=ft.icons.PHOTO_CAMERA,
-                            text="Tomar imagenes",
-                            col={'md': 6, 'lg': 3}
-
-                        )
+                        content=self.btnTomarImagenes
                     ),
                     ft.Container(
                         alignment=ft.alignment.center,
@@ -153,23 +156,19 @@ class PrincipalGUI(ft.UserControl):
 
         )
 
-        #Se crean las Listas para navegar entre contenedores
+        #LISTAS- PARA CONTENEDORES
+        #Lista- Registro(Agregar-Administrar)
         self.ContenedoresResgistro=[self.CtTomarImagenes,self.CtAdministarDatos]
-        ###################################################
-        ################################################
-        #ME QUEDE EN BUSCAR QUE LA PARTE 4 DEL DISEÑO ABARQUE MAS ESPACIO, ANTES DE SALIR, MI IDEA ES QUE MIENTRAS PONGA MAS COSAS, SOLO SE VA A AUTOAJUSTAR
         self.ContenedorRegistro= ft.Container(
             expand=True,
             col=11,
             content=self.ContenedoresResgistro[1],
         )
-        #Paneles (implementacion de componentes)
-        self.Navegacion= ft.Container(#Se crea el container par apoder ponerle cosas dentro 
+    #ME QUEDE AQUIIIIIIIIIIIIII, QUERIA VER EL TEMA DE CAMBIAR DE PANELES
 
-            col=1,
-            bgcolor=self.ColorFondoN,
-            border_radius= 10,
-            #El content se usa para recien delimitar el contenido que tendra el container, el resto es para estetica del contenedor
+        #PANELES PRINCIPALES (implementacion de componentes)
+        #Navegacion
+        self.Navegacion= ft.Container(col=1,bgcolor=self.ColorFondoN,on_change=self.change_page,border_radius= 10,
             content=ft.Column( 
                 #Controls es como en content pero de las columnas y filas, es una lista, lo que se coloque ahi va a estar ordenado en la columna, o la fila 
                 controls=[
@@ -186,8 +185,6 @@ class PrincipalGUI(ft.UserControl):
                                 ft.NavigationDestination(label="REGISTRO",icon=ft.icons.APP_REGISTRATION),
                                 ft.NavigationDestination(label="HISTORIAL",icon=ft.icons.FACT_CHECK),
                             ]
-
-
                         )
                     ),
                     ft.Container(
@@ -198,22 +195,16 @@ class PrincipalGUI(ft.UserControl):
                             expand=True,
                             alignment=ft.MainAxisAlignment.END,
                             controls=[
-                                ft.IconButton(
-                                icon=ft.icons.OUTPUT,
-                            ),
-                            
-                            ],
-                            
-                            
+                                self.btnIconSalir,
+                            ],  
                         )
-
                     ),
                 ]
             )
 
         )
         
-#SE DEFINEN LOS CONTENEDORES PRINCIPALES
+        #Home
         self.Contenedor_Inicial_Home=ft.Container(
             expand= True,
             border_radius= 10,
@@ -252,9 +243,7 @@ class PrincipalGUI(ft.UserControl):
                                             size=14,
                                             weight=500
                                         ),
-                                        ft.ElevatedButton(
-                                            text="INICIAR",
-                                        )     
+                                        self.btnIniciarReconocimiento,
                                     ]
                                 )
                         ),
@@ -286,9 +275,7 @@ class PrincipalGUI(ft.UserControl):
                                             size=14,
                                             weight=500
                                         ),
-                                        ft.ElevatedButton(
-                                            text="FINALIZAR",
-                                        )     
+                                        self.btnFinalizarVideo,
                                     ]
                                 )
                             )
@@ -329,20 +316,8 @@ class PrincipalGUI(ft.UserControl):
                         content=ft.ResponsiveRow(
                             alignment=ft.MainAxisAlignment.CENTER,
                             controls=[
-                                 
-                                ft.ElevatedButton(
-                                    expand=True,
-                                    icon=ft.icons.GROUP_ADD,
-                                    text="Agregar nuevo empleado",
-                                    col={'md': 6, 'lg': 3},
-                                    
-
-                                ),
-                                ft.ElevatedButton(
-                                    icon=ft.icons.TABLE_VIEW,
-                                    text="Administrar empleados",
-                                    col={'md': 6, 'lg': 3}
-                                ),
+                                self.btnAgregarEmpleadoPanel,
+                                self.btnAdministrarEmpleadosPanel,
                             ]
                         )
                     ),
@@ -372,13 +347,13 @@ class PrincipalGUI(ft.UserControl):
                                                         ft.Column(
                                                             col={'md': 3, 'lg':6 },
                                                             controls=[
-                                                                self.tfTipoEmpleado
+                                                                self.cbTipoEmpleado
                                                             ]
                                                         ),
                                                         ft.Column(
                                                             col={'md': 3, 'lg':6 },
                                                             controls=[
-                                                                self.PermisoDIngreso
+                                                                self.cbPermisoDIngreso
 
                                                             ]
                                                             
@@ -399,14 +374,9 @@ class PrincipalGUI(ft.UserControl):
 
         )
 
-
-        
         #Se crean las Listas para navegar entre contenedores
         self.ContenedoresPrincipales=[self.Contenedor_Inicial_Home,self.Contenedor_Inicial_Registro]
         
-
-        
-       
 
         self.Paneles= ft.Container(
             expand=True,
@@ -424,6 +394,20 @@ class PrincipalGUI(ft.UserControl):
 
     def build(self):
         return self.Contenido
+    
+    def getNombreRegistro(self):
+        return self.tfNombreEmpleado.value
+    def getApellidoRegistro(self):
+        return self.tfApellidosEmpleado.value
+    def getDniRegistro(self):
+        return self.tfDniEmpleado.value
+    def getTipoEmpleadoRegistro(self):
+        return self.cbTipoEmpleado.value
+    def getPermisoIngresoRegistro(self):
+        return self.cbPermisoDIngreso.value
+    
+    def change_page(self,e):
+        index= e.control.selected_index
 
 def main(page: ft.Page):
     page.window_min_height=820
