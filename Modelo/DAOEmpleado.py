@@ -1,5 +1,5 @@
-from ConexionBD import Conexion
-from DTOEmpleado import EmpleadoDTO
+from .ConexionBD import Conexion
+from .DTOEmpleado import EmpleadoDTO
 
 class EmpleadoDAO():
     def __init__(self):

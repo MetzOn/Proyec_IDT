@@ -1,11 +1,11 @@
 
-from ConexionBD import Conexion
-from DTOImagen import ImagenDTO
-from DTOEmpleado import EmpleadoDTO
+from .ConexionBD import Conexion
+from .DTOImagen import ImagenDTO
+from .DTOEmpleado import EmpleadoDTO
 import cv2
 import numpy as np
 
-class Imagen:
+class ImagenDAO:
     def __init__(self):
         self.conexion_manager=Conexion()
         

@@ -1,7 +1,7 @@
 import flet as ft
 
 class PrincipalGUI(ft.UserControl):
-    def __init__(self, page):
+    def __init__(self):
         super().__init__(expand=True)
         #Colores:
         self.ColorFondoN='#274060'
@@ -445,12 +445,10 @@ class PrincipalGUI(ft.UserControl):
                                 controls=[
                                     self.tbHistorialEmpleados
                                     ]
-                            )
+                                    )
                             
-                        ]
-                    ),
-                                
-                                
+                                ]
+                                ),
                             ]
                         )
 
@@ -480,8 +478,6 @@ class PrincipalGUI(ft.UserControl):
         )
 
 
-    def build(self):
-        return self.Contenido
     
     def getNombreRegistro(self):
         return self.tfNombreEmpleado.value
@@ -489,6 +485,8 @@ class PrincipalGUI(ft.UserControl):
         return self.tfApellidosEmpleado.value
     def getDniRegistro(self):
         return self.tfDniEmpleado.value
+    def getTelefonoRegistro(self):
+        return self.tfTelefonoEmpleado.value
     def getTipoEmpleadoRegistro(self):
         return self.cbTipoEmpleado.value
     def getPermisoIngresoRegistro(self):
@@ -506,10 +504,6 @@ class PrincipalGUI(ft.UserControl):
         self.ContenedorRegistro.content=self.ContenedoresResgistro[0]
         self.update()
 
-def main(page: ft.Page):
-    page.window_min_height=820
-    page.window_min_width=1100
-    page.theme_mode=ft.ThemeMode.SYSTEM
-    page.add(PrincipalGUI(page))
-
-ft.app(main)
+    def build(self):
+        return self.Contenido
+    
