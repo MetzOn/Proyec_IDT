@@ -14,9 +14,9 @@ class ImagenDAO:
         cursor=None
         if isinstance(imag, ImagenDTO):
             
-            nombre=imag.getNombreI
-            contenido=imag.getContenidoI
-            id_empleado= imag.getIdE
+            nombre=imag.getNombreI()
+            contenido=imag.getContenidoI()
+            id_empleado= imag.getIdE()
 
         try:
             con=self.conexion_manager.conectar()

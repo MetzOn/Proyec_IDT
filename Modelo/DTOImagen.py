@@ -18,7 +18,7 @@ class ImagenDTO():
 
     def getNombreI(self):
         return self.nombreI
-    def setNombreE(self,nombreI):
+    def setNombreI(self,nombreI):
         self.nombreI=nombreI
 
     def getContenidoI(self):

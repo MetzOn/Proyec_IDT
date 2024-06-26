@@ -22,15 +22,17 @@ class EmpleadoDAO():
                 con.autocommit=False
                 cursor=con.cursor()
                 sql='''INSERT INTO empleado (Nombre,Apellido,DNI,FechaRegistro,Telefono,Tipo,Permiso) VALUES('{}','{}','{}','{}','{}','{}','{}')'''.format(nombreE,apellidoE,dniE,fechaRegistroE,telefonoE,tipoE,permisoE)
-                resp=cursor.execute(sql)
+                cursor.execute(sql)
                 con.commit()
+                resp = cursor.rowcount > 0
+                return resp
             except Exception as e:
                 print(f'Error al agregar datos de Empleado: {e}')
             finally:
                 self.conexion_manager.desconectar(con, cursor)
-            return resp
+            
     
-    def mostrarDatosMiemb(self):
+    def mostrarDatosEmpleado(self):
         con=None
         cursor=None
         empleados = []
@@ -38,7 +40,7 @@ class EmpleadoDAO():
             con=self.conexion_manager.conectar()
             con.autocommit=False
             cursor=con.cursor()
-            sql="SELECT * FROM miembro"
+            sql="SELECT * FROM empleado"
             cursor.execute(sql)
             datos= cursor.fetchall()
             for tupla in datos:
@@ -51,7 +53,7 @@ class EmpleadoDAO():
                 tipoE=tupla[6]
                 permisoE=tupla[7]
                 empleado = EmpleadoDTO()
-                empleado.setIdE()
+                empleado.setIdE(idE)
                 empleado.setNombreE(nombreE)
                 empleado.setApellidoE(apellidoE)
                 empleado.setDniE(dniE)
@@ -114,3 +116,26 @@ class EmpleadoDAO():
         finally:
             self.conexion_manager.desconectar(con, cursor)
         return resp
+    
+    def obtenerIDEmpleado(self,dni):
+        resp =None
+        con=None
+        cursor=None
+        try:
+            con=self.conexion_manager.conectar()
+            con.autocommit=False
+            cursor=con.cursor()
+            sql = '''SELECT IdEmpleado FROM empleado WHERE DNI ='{}' '''.format(dni)
+            cursor.execute(sql)
+            resultado = cursor.fetchone()
+            con.commit()
+            if resultado:
+                id_obtenido = resultado[0]
+                return id_obtenido
+            else:
+                return None
+        except Exception as e:
+            print("Error al obtener el ID del empleado:", e)
+            return None
+        finally:
+            self.conexion_manager.desconectar(con, cursor)

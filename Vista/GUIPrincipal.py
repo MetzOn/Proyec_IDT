@@ -36,22 +36,23 @@ class PrincipalGUI(ft.UserControl):
         #Componentes: 
 
         #Para el video
-        self.Imagen_video=ft.Image( src=False, width="100%", height="100%")
-        self.Imagen_Captura=ft.Image(src=False,width="100%")
+        self.Imagen_video=ft.Image(data=None)
+        self.Imagen_Captura=ft.Image(src_base64="")
+        
 
         #TextField para el Registro de empleados
-        self.tfNombreEmpleado=ft.TextField(hint_text="Ingrese su nombre",label="Nombres", height=40)
-        self.tfApellidosEmpleado=ft.TextField(hint_text="Ingrese su apellido",label="Apellidos", height=40)
-        self.tfIdEmpleado=ft.TextField(hint_text="ID: Se genera Automaticamente",disabled=True, height=40 )
-        self.tfDniEmpleado=ft.TextField(hint_text="Ingrese su DNI",max_length=8,keyboard_type=ft.KeyboardType.NUMBER,label="DNI", height=50 )
-        self.tfTelefonoEmpleado=ft.TextField(hint_text="Ingrese su teléfono",max_length=9,keyboard_type=ft.KeyboardType.PHONE,label="Telefono",height=50)
-        self.cbTipoEmpleado=ft.Dropdown(label="Tipo de Empleado",hint_text="Seleccione el tipo de empleado",height=40,
+        self.tfNombreEmpleado=ft.TextField(hint_text="Ingrese su nombre",label="Nombres")
+        self.tfApellidosEmpleado=ft.TextField(hint_text="Ingrese su apellido",label="Apellidos")
+        self.tfIdEmpleado=ft.TextField(hint_text="ID: Se genera Automaticamente",disabled=True)
+        self.tfDniEmpleado=ft.TextField(hint_text="Ingrese su DNI",max_length=8,keyboard_type=ft.KeyboardType.NUMBER,label="DNI")
+        self.tfTelefonoEmpleado=ft.TextField(hint_text="Ingrese su teléfono",max_length=9,keyboard_type=ft.KeyboardType.PHONE,label="Telefono")
+        self.cbTipoEmpleado=ft.Dropdown(label="Tipo de Empleado",hint_text="Seleccione el tipo de empleado",
         options=[
             ft.dropdown.Option(key="A", text="Administrador"),
             ft.dropdown.Option(key="B", text="Empleado")
             ]
         )
-        self.cbPermisoDIngreso=ft.Dropdown(label="Permiso de ingreso", height=40 ,hint_text="Seleccione el tipo de permiso",
+        self.cbPermisoDIngreso=ft.Dropdown(label="Permiso de ingreso",hint_text="Seleccione el tipo de permiso",
             options=[
             ft.dropdown.Option(key="1", text="Permitido"),
             ft.dropdown.Option(key="0", text="No permitido")
@@ -72,8 +73,9 @@ class PrincipalGUI(ft.UserControl):
         self.btnFinalizarVideo=ft.ElevatedButton(text="FINALIZAR")    
         #Registro-Agregar nuevo empleado
         self.btnAgregarEmpleadoPanel=ft.ElevatedButton(expand=True,on_click=self.Change_NavRegistroCrear,icon=ft.icons.SUPERVISED_USER_CIRCLE_ROUNDED,text="Agregar nuevo empleado",col={'md': 6, 'lg': 3},)                                
-        self.btnCrearEmpleado=ft.ElevatedButton(icon=ft.icons.GROUP_ADD,text="Crear Perfil")
+        self.btnCrearEmpleado=ft.ElevatedButton(icon=ft.icons.GROUP_ADD,text="Crear Perfil",col={'md': 6, 'lg': 3},disabled=True)
         self.btnTomarImagenes=ft.ElevatedButton(icon=ft.icons.PHOTO_CAMERA,text="Tomar imagenes",col={'md': 6, 'lg': 3})
+        self.btnFinalizarVideo=ft.ElevatedButton(icon=ft.icons.PHOTO_CAMERA_OUTLINED,text="Finalizar Video",col={'md': 6, 'lg': 3},disabled=True)
         #Registro-AdministrarEmpleados
         self.btnAdministrarEmpleadosPanel=ft.ElevatedButton(icon=ft.icons.TABLE_VIEW,on_click=self.Change_NavRegistroAdmin,text="Administrar empleados",col={'md': 6, 'lg': 3})
         self.btnModificarEmpleado=ft.ElevatedButton(icon=ft.icons.UPDATE,text="Actualizar",col={'md': 6, 'lg': 3},)
@@ -122,19 +124,19 @@ class PrincipalGUI(ft.UserControl):
                 controls=[
                     ft.Container(
                         alignment=ft.alignment.center,
-                        content=self.btnTomarImagenes
-                    ),
-                    ft.Container(
-                        alignment=ft.alignment.center,
-                        expand=True,
-                        content=self.Imagen_Captura
-                    ),
-                    ft.Container(
-                        alignment=ft.alignment.bottom_right,
-                        content=self.btnCrearEmpleado
+                        content=ft.ResponsiveRow(
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            
+                            controls=[
+                                self.btnTomarImagenes,
+                                self.btnCrearEmpleado
+                                
 
-                    )
-                                                    
+                            ]
+
+                        )
+                    ),
+
                 ]
             )
         )
@@ -187,8 +189,7 @@ class PrincipalGUI(ft.UserControl):
             content=self.ContenedoresResgistro[0],
         )
 
-    #ME QUEDE AQUIIIIIIIIIIIIII, QUERIA VER EL TEMA DE CAMBIAR DE PANELES
-
+   
         #PANELES PRINCIPALES (implementacion de componentes)
         #Navegacion
         self.Navegacion= ft.Container(col=1,bgcolor=self.ColorFondoN,
@@ -272,19 +273,7 @@ class PrincipalGUI(ft.UserControl):
                                     ]
                                 )
                         ),
-                        ft.Container(
-                            expand=True,
-                            alignment=ft.alignment.center,
-                            content=(
-                                ft.Column(
-                                    controls=[
-                                        self.Imagen_video
-                                    ]
-                                )
-                            )
-                            
-
-                        ),
+                       
                         ft.Container(
                             padding=20,
                             
@@ -325,7 +314,7 @@ class PrincipalGUI(ft.UserControl):
                 controls=[
                     ft.Container(
                         bgcolor=self.ColorFondoN,
-                            padding=20,
+                            padding=ft.padding.only(bottom=30),
                             content=ft.Column(
                                 controls=[
                                     ft.Row(
@@ -348,6 +337,7 @@ class PrincipalGUI(ft.UserControl):
                         )
                     ),
                     ft.Container(
+                        margin=40,
                         height=200,
                         content=ft.ResponsiveRow(
                             alignment=ft.MainAxisAlignment.CENTER,
@@ -478,7 +468,7 @@ class PrincipalGUI(ft.UserControl):
         )
 
 
-    
+    #OBTENCION DE VALORES DE TEXTFIELD
     def getNombreRegistro(self):
         return self.tfNombreEmpleado.value
     def getApellidoRegistro(self):
@@ -492,6 +482,7 @@ class PrincipalGUI(ft.UserControl):
     def getPermisoIngresoRegistro(self):
         return self.cbPermisoDIngreso.value
     
+    #CAMBIAR ENTRE PANELES
     def Change_NavPrincipal(self,e):
         index= e.control.selected_index
         self.Paneles.content=self.ContenedoresPrincipales[index]
@@ -504,6 +495,18 @@ class PrincipalGUI(ft.UserControl):
         self.ContenedorRegistro.content=self.ContenedoresResgistro[0]
         self.update()
 
+    #VALIDACIONES: 
+    def is_number(self, text):
+        for char in text:
+            if not char.isdigit():
+                return False
+        return True
+    def _on_change(self,event):
+        text = event.control.value
+        if not self.is_number(text):
+            ft.alert("Solo se permiten números")
+            event.control.value = "" 
+    
     def build(self):
         return self.Contenido
     

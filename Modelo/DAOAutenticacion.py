@@ -5,6 +5,9 @@ class AutenticacionDAO:
     def __init__(self) :
         self.conexion_manager=Conexion()
 
+
+
+
     def AutenticarUsuario(self, Usuario):
         
         con=None
