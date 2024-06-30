@@ -43,7 +43,7 @@ class PrincipalGUI(ft.UserControl):
         #TextField para el Registro de empleados
         self.tfNombreEmpleado=ft.TextField(hint_text="Ingrese su nombre",label="Nombres")
         self.tfApellidosEmpleado=ft.TextField(hint_text="Ingrese su apellido",label="Apellidos")
-        self.tfIdEmpleado=ft.TextField(hint_text="ID: Se genera Automaticamente",disabled=True)
+        self.tfIdEmpleado=ft.TextField(label="ID",hint_text="ID: Se genera Automaticamente",disabled=True)
         self.tfDniEmpleado=ft.TextField(hint_text="Ingrese su DNI",max_length=8,keyboard_type=ft.KeyboardType.NUMBER,label="DNI")
         self.tfTelefonoEmpleado=ft.TextField(hint_text="Ingrese su teléfono",max_length=9,keyboard_type=ft.KeyboardType.PHONE,label="Telefono")
         self.cbTipoEmpleado=ft.Dropdown(label="Tipo de Empleado",hint_text="Seleccione el tipo de empleado",
@@ -72,12 +72,12 @@ class PrincipalGUI(ft.UserControl):
         self.btnIniciarReconocimiento=ft.ElevatedButton(text="INICIAR") 
         self.btnFinalizarVideo=ft.ElevatedButton(text="FINALIZAR")    
         #Registro-Agregar nuevo empleado
-        self.btnAgregarEmpleadoPanel=ft.ElevatedButton(expand=True,on_click=self.Change_NavRegistroCrear,icon=ft.icons.SUPERVISED_USER_CIRCLE_ROUNDED,text="Agregar nuevo empleado",col={'md': 6, 'lg': 3},)                                
+        self.btnAgregarEmpleadoPanel=ft.ElevatedButton(expand=True,icon=ft.icons.SUPERVISED_USER_CIRCLE_ROUNDED,text="Agregar nuevo empleado",col={'md': 6, 'lg': 3},)                                
         self.btnCrearEmpleado=ft.ElevatedButton(icon=ft.icons.GROUP_ADD,text="Crear Perfil",col={'md': 6, 'lg': 3},disabled=True)
         self.btnTomarImagenes=ft.ElevatedButton(icon=ft.icons.PHOTO_CAMERA,text="Tomar imagenes",col={'md': 6, 'lg': 3})
         self.btnFinalizarVideo=ft.ElevatedButton(icon=ft.icons.PHOTO_CAMERA_OUTLINED,text="Finalizar Video",col={'md': 6, 'lg': 3},disabled=True)
         #Registro-AdministrarEmpleados
-        self.btnAdministrarEmpleadosPanel=ft.ElevatedButton(icon=ft.icons.TABLE_VIEW,on_click=self.Change_NavRegistroAdmin,text="Administrar empleados",col={'md': 6, 'lg': 3})
+        self.btnAdministrarEmpleadosPanel=ft.ElevatedButton(icon=ft.icons.TABLE_VIEW,text="Administrar empleados",col={'md': 6, 'lg': 3})
         self.btnModificarEmpleado=ft.ElevatedButton(icon=ft.icons.UPDATE,text="Actualizar",col={'md': 6, 'lg': 3},)
         self.btnEliminarEmpleado=ft.ElevatedButton(icon=ft.icons.DELETE,text="Eliminar",col={'md': 6, 'lg': 3},)
 
@@ -85,11 +85,13 @@ class PrincipalGUI(ft.UserControl):
         #Registro-AdministrarEmpleados
         self.tbRegistroEmpleados=ft.DataTable(
             expand=True,
+            column_spacing=1,
             border= ft.border.all(2,self.ColorFondoA),
             data_row_color={ft.MaterialState.SELECTED:"purple",
                             ft.MaterialState.PRESSED:"black"},
             border_radius=10,
             show_checkbox_column=True,
+            
             columns=[
                 ft.DataColumn(ft.Text("ID",color=self.ColorFondoA,weight="bold")),
                 ft.DataColumn(ft.Text("Nombre",color=self.ColorFondoA,weight="bold")),
@@ -488,12 +490,7 @@ class PrincipalGUI(ft.UserControl):
         self.Paneles.content=self.ContenedoresPrincipales[index]
         self.update()
         
-    def Change_NavRegistroAdmin(self,e):
-        self.ContenedorRegistro.content=self.ContenedoresResgistro[1]
-        self.update()
-    def Change_NavRegistroCrear(self,e):
-        self.ContenedorRegistro.content=self.ContenedoresResgistro[0]
-        self.update()
+   
 
     #VALIDACIONES: 
     def is_number(self, text):

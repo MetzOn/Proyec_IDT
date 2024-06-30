@@ -39,6 +39,7 @@ class LoginController:
         self.view.page.window_min_width=1100
         self.view.page.theme_mode=ft.ThemeMode.SYSTEM
         self.view.page.add(principal_view)
+        self.view.page.update()
         principal_controller.run()
 
     def run(self):
