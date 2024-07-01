@@ -2,20 +2,31 @@ import flet as ft
 import cv2
 import imutils
 import numpy as np
+import time
 from Modelo.DAOEmpleado import EmpleadoDAO
 from Modelo.DTOEmpleado import EmpleadoDTO
 from Modelo.DAOImagen import ImagenDAO
 from Modelo.DTOImagen import ImagenDTO
+from Modelo.DAOHistorial import HistorialDAO
+from Modelo.DTOHistorial import HistorialDTO
 from Vista.GUIPrincipal import PrincipalGUI
 
 class PrincipalControlador:
-    def __init__(self, view: PrincipalGUI, EmpleadoDao: EmpleadoDAO,ImagenDao: ImagenDAO):
+    def __init__(self, view: PrincipalGUI, EmpleadoDao: EmpleadoDAO,ImagenDao: ImagenDAO,HistorialDao: HistorialDAO):
         self.view = view
         self.modelEmpleado = EmpleadoDao
         self.modelImagen = ImagenDao
+        self.modelHistorial=HistorialDao
         self.cap=None
         self.imagenes = []
         self.etiqueta_sospechoso_mapping={}
+        self.dni_Empleado_mapping={}
+        self.nombre_detectado_actual=None
+        self.tiempo_inicio_nombre=None
+        self.nombre_guardado=None
+        self.frame_guardado=None
+        self.indicador_guardado=None
+        self.video_pausado = False
         self.face_recognizer= cv2.face.LBPHFaceRecognizer_create()
         self.view.btnCrearEmpleado.on_click = self.Click_videoRegistroCrearEmpleado
         self.view.btnTomarImagenes.on_click=self.Click_videoRegistroTomarImagenes
@@ -28,11 +39,14 @@ class PrincipalControlador:
         self.EntrenarSistema()        
   
     #NAVEGACION 
-        
+         
     def Change_NavRegistroAdmin(self,e):
         self.view.ContenedorRegistro.content=self.view.ContenedoresResgistro[1]
         self.view.update()
+
         self.Click_ListarEmpleados()
+        
+    
 
     def Change_NavRegistroCrear(self,e):
         self.view.ContenedorRegistro.content=self.view.ContenedoresResgistro[0]
@@ -40,6 +54,12 @@ class PrincipalControlador:
 
     #RECONOCIMIENTO VIDEO CAP
     def Click_IniciarCamara(self, e):
+        self.nombre_guardado=None
+        self.frame_guardado=None
+        self.indicador_guardado=None
+        self.nombre_detectado_actual=None
+        self.tiempo_inicio_nombre=None
+
         self.faceClassif = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
         self.face_recognizer.read('ModeloFacesFrontalData2024.xml')
         self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW) 
@@ -54,13 +74,15 @@ class PrincipalControlador:
                     rostro = auxFrame[y:y + h, x:x + w]  # Recorta la región de la cara
                     rostro = cv2.resize(rostro, (300, 300), interpolation=cv2.INTER_CUBIC)  # Redimensiona la cara
                     result = self.face_recognizer.predict(rostro)  # Realiza el reconocimiento facial en la cara
-                    
+                        
                     if result[1] < 65:  # Si la confianza en el reconocimiento es alta
                         nombre = self.etiqueta_sospechoso_mapping.get(result[0], "No encontrado")  # Obtiene el nombre correspondiente a la etiqueta
                         if nombre != "No encontrado":
-                            name = nombre
+                                name = nombre
+                                self.procesar_nombre(name,frame,result[0])
+                                
                         else:
-                            name=nombre
+                                name=nombre
                     else:  # Si la confianza en el reconocimiento es baja
                         name = "Desconocido"
                     info_text = f"{name} ({result[1]:.2f})"
@@ -69,16 +91,20 @@ class PrincipalControlador:
 
                 cv2.imshow('Reconocimiento Facial', frame)  # Muestra el frame con las caras detectadas
                 key = cv2.waitKey(1)  # Espera 1 milisegundo por la pulsación de una tecla
-                if key == 27: 
+                if key == 27 or (self.nombre_guardado is not None and self.frame_guardado is not None): 
                     self.finalizar_video() # Si se presiona la tecla 'Esc' (27 en ASCII), finaliza la visualización
                     break
+        if self.nombre_guardado is not None and self.frame_guardado is not None:
+            self.mostrar_ventana_reconocimiento(self.nombre_guardado)
+            
 
     # Finaliza la visualización del video
 
     def finalizar_video(self):
         # Método para finalizar la visualización del video y liberar los recursos de la cámara
         self.cap.release()  # Libera los recursos de la cámara
-        cv2.destroyAllWindows()  # Cierra todas las ventanas de OpenCV
+        cv2.destroyAllWindows() 
+         # Cierra todas las ventanas de OpenCV
 
 
 
@@ -165,8 +191,14 @@ class PrincipalControlador:
 
 
     def EntrenarSistema(self):
-        facesData,self.indicesReconocimiento,self.Diccionario=self.modelImagen.ObtenerContenidoImagenes_NombresEmpleado()
+        facesData,self.indicesReconocimiento,self.Diccionario,self.Diccionario_dni=self.modelImagen.ObtenerContenidoImagenes_NombresEmpleado()
+        
+        if not self.Diccionario:
+            print("El diccionario está vacío. No se realizará el entrenamiento.")
+            return None
+        
         self.etiqueta_sospechoso_mapping = {etiqueta: nombre for nombre, etiqueta in self.Diccionario.items()}
+        self.dni_Empleado_mapping = {current_label: dni for dni, current_label in self.Diccionario_dni.items()}
         print("Diccionario de entrenamiento:", self.etiqueta_sospechoso_mapping)
 
         model = cv2.face.LBPHFaceRecognizer_create()
@@ -248,11 +280,82 @@ class PrincipalControlador:
         self.Click_ListarEmpleados()
     ##YA SE IDENTIFICA, Y TODO, SOLO DEBO IMPLEMENTAR LAS VENTANAS DE ALERTA, LA SECCION DE HISTORIAL, ALERTAS Y NA MAS CREO##
 
-   
+
+
+    
+    def RegistrarHistorial():
+        return
+
+
+    def procesar_nombre(self, nombre_detectado,frame,indicador_dni):
+            if self.nombre_detectado_actual == nombre_detectado:
+                # Si el nombre es el mismo que el detectado previamente, incrementa el temporizador
+                tiempo_actual = time.time()
+                if self.tiempo_inicio_nombre is None:
+                    self.tiempo_inicio_nombre = tiempo_actual
+                elif tiempo_actual - self.tiempo_inicio_nombre >= 4:
+                    # Si el temporizador ha alcanzado los 2 segundos, guarda el nombre
+                    self.nombre_guardado = nombre_detectado
+                    self.frame_guardado=frame
+                    self.indicador_guardado=indicador_dni
+            else:
+                # Si el nombre es diferente, reinicia el temporizador y almacena el nuevo nombre
+                self.tiempo_inicio_nombre = time.time()
+                self.nombre_detectado_actual = nombre_detectado
+
+
+    def mostrar_ventana_reconocimiento(self,nombre):
+        self.ventana_reconocimiento = ft.AlertDialog(
+            title=ft.Text("Empleado Detectado"),
+            modal=True,
+            content=ft.Text(f"Nombre: {nombre}"),
+            actions=[
+                ft.ElevatedButton("OK", on_click=self.cerrar_dialogo)],
+            open=True
+        )
+        self.view.page.dialog = self.ventana_reconocimiento
+        self.view.page.update()
+
+    #HISTORIAL
+    def cerrar_dialogo(self, e):
+        self.ventana_reconocimiento.open = False
+        self.view.page.update()
+        #Crear historial: 
+        dni=self.dni_Empleado_mapping.get(self.indicador_guardado, "Desconocido")
+        print(dni)
+        idEmpleado=self.modelEmpleado.obtenerIDEmpleado(dni)
+        historial=HistorialDTO(None,idEmpleado,None,None)
+        resp=self.modelHistorial.createHistorial(historial)
+        if(resp):
+            print("Historial subido exitosamente")
+        else:
+            print("Error")
+
+    def Click_ListarHistorial(self): 
+        self.view.tbHistorialEmpleados.rows=[]
+
+        Historial= self.modelHistorial.mostrarDatosH()
+        for historial in Historial:
+            self.view.tbHistorialEmpleados.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(ft.Text(str(historial.getFechaH()))),
+                        ft.DataCell(ft.Text(historial.getHoraH())),
+                        ft.DataCell(ft.Text(historial.getNombre())),
+                        ft.DataCell(ft.Text(historial.getDniE())),
+                        ft.DataCell(ft.Text(historial.getDni())),
+                        ft.DataCell(ft.Text(historial.getIdH())),
+                    ]
+                )
+            )
+        self.view.update()
+
+
+
     def run(self):
         self.view.page.update()
     
     def main(self,page: ft.Page):
-        
         page.add(self.view)
+        self.view.page.update()
 

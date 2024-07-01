@@ -33,6 +33,10 @@ class PrincipalGUI(ft.UserControl):
                                 weight=ft.FontWeight.W_500,
                                 font_family="Arial"))
         self.direccion_principal=[self.direccion1,self.direccion2,self.direccion3]
+        #Indicadores recurso navegacion:
+        self.index_guardado=None
+
+
         #Componentes: 
 
         #Para el video
@@ -80,6 +84,9 @@ class PrincipalGUI(ft.UserControl):
         self.btnAdministrarEmpleadosPanel=ft.ElevatedButton(icon=ft.icons.TABLE_VIEW,text="Administrar empleados",col={'md': 6, 'lg': 3})
         self.btnModificarEmpleado=ft.ElevatedButton(icon=ft.icons.UPDATE,text="Actualizar",col={'md': 6, 'lg': 3},)
         self.btnEliminarEmpleado=ft.ElevatedButton(icon=ft.icons.DELETE,text="Eliminar",col={'md': 6, 'lg': 3},)
+        #Ventanas emergentes
+        self.VentanaEmergente = ft.AlertDialog()
+
 
         #TABLAs
         #Registro-AdministrarEmpleados
@@ -112,10 +119,12 @@ class PrincipalGUI(ft.UserControl):
             border_radius=10,
             show_checkbox_column=True,
             columns=[
-                ft.DataColumn(ft.Text("ID",color=self.ColorFondoA,weight="bold")),
-                ft.DataColumn(ft.Text("Nombre",color=self.ColorFondoA,weight="bold")),
                 ft.DataColumn(ft.Text("Fecha",color=self.ColorFondoA,weight="bold")),
                 ft.DataColumn(ft.Text("Hora",color=self.ColorFondoA,weight="bold")),
+                ft.DataColumn(ft.Text("Nombre",color=self.ColorFondoA,weight="bold")),
+                ft.DataColumn(ft.Text("DNI",color=self.ColorFondoA,weight="bold")),
+                ft.DataColumn(ft.Text("ID",color=self.ColorFondoA,weight="bold")),
+                
             ]
         )
         
@@ -316,7 +325,7 @@ class PrincipalGUI(ft.UserControl):
                 controls=[
                     ft.Container(
                         bgcolor=self.ColorFondoN,
-                            padding=ft.padding.only(bottom=30),
+                        padding=20,
                             content=ft.Column(
                                 controls=[
                                     ft.Row(
@@ -339,8 +348,7 @@ class PrincipalGUI(ft.UserControl):
                         )
                     ),
                     ft.Container(
-                        margin=40,
-                        height=200,
+                        height=250,
                         content=ft.ResponsiveRow(
                             alignment=ft.MainAxisAlignment.CENTER,
                             controls=[
@@ -430,16 +438,16 @@ class PrincipalGUI(ft.UserControl):
                                     )]
                                 ),
                                 ft.Column(
-                        expand=True,
-                        scroll="auto",
-                        controls=[
-                            ft.ResponsiveRow(
-                                controls=[
-                                    self.tbHistorialEmpleados
-                                    ]
-                                    )
-                            
-                                ]
+                                    expand=True,
+                                    scroll="auto",
+                                    controls=[
+                                        ft.ResponsiveRow(
+                                            controls=[
+                                                self.tbHistorialEmpleados
+                                                ]
+                                                )
+                                        
+                                            ]
                                 ),
                             ]
                         )
@@ -483,10 +491,13 @@ class PrincipalGUI(ft.UserControl):
         return self.cbTipoEmpleado.value
     def getPermisoIngresoRegistro(self):
         return self.cbPermisoDIngreso.value
+    def getIndicadorRecursoNavegacion(self):
+        return self.index_guardado
     
     #CAMBIAR ENTRE PANELES
     def Change_NavPrincipal(self,e):
         index= e.control.selected_index
+        self.index_guardado=index
         self.Paneles.content=self.ContenedoresPrincipales[index]
         self.update()
         

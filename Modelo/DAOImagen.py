@@ -117,16 +117,17 @@ class ImagenDAO:
         cursor=None
         facesData = []
         labels = []
-        Empleado_name_mapping = {}  # Un diccionario para hacer un seguimiento de los nombres de los sospechosos
+        Empleado_name_mapping = {}  # Un diccionario para hacer un seguimiento de los nombres de los Empleados
+        Empleado_dni_mapping = {} 
         current_label = 0
         try:
             con = self.conexion_manager.conectar()
             cursor = con.cursor()
-            sql = ''' SELECT imagenes.Imagen, empleado.Nombre
+            sql = ''' SELECT imagenes.Imagen, empleado.Nombre,empleado.DNI
                       FROM imagenes
                       INNER JOIN empleado ON imagenes.IdEmpleado = empleado.IdEmpleado'''
             cursor.execute(sql)
-            for contenido_i, nombre_s in cursor:
+            for contenido_i, nombre_s,dni in cursor:
                 # Procesar la imagen desde el contenido binario
                 image_array = np.frombuffer(contenido_i, np.uint8)
                 image = cv2.imdecode(image_array, cv2.IMREAD_GRAYSCALE)  # Leer en escala de grises
@@ -135,11 +136,13 @@ class ImagenDAO:
                 # Asociar una etiqueta única al nombre del sospechoso
                 if nombre_s not in Empleado_name_mapping:
                     Empleado_name_mapping[nombre_s] = current_label
+                    Empleado_dni_mapping[dni]=current_label
                     current_label += 1
                 labels.append(Empleado_name_mapping[nombre_s])
+                
                 print(nombre_s)
             
-            return facesData, labels, Empleado_name_mapping
+            return facesData, labels, Empleado_name_mapping,Empleado_dni_mapping
         
         except Exception as e:
             print(f'Error al obtener Imagenes: {e}')

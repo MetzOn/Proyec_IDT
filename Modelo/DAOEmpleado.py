@@ -13,7 +13,6 @@ class EmpleadoDAO():
             nombreE=empleado.getNombreE()
             apellidoE=empleado.getApellidoE()
             dniE=empleado.getDniE()
-            fechaRegistroE=empleado.getFechaRegistroE()
             telefonoE=empleado.getTelefonoE()
             tipoE=empleado.getTipoE()
             permisoE=empleado.getPermisoE()
@@ -30,21 +29,21 @@ class EmpleadoDAO():
                     return False
             except Exception as e: 
                 print(f'Error al agregar consultar dni: {e}')
-            
-            else:
-                try:
-                    con=self.conexion_manager.conectar()
-                    con.autocommit=False
-                    cursor=con.cursor()
-                    sql='''INSERT INTO empleado (Nombre,Apellido,DNI,FechaRegistro,Telefono,Tipo,Permiso) VALUES('{}','{}','{}','{}','{}','{}','{}')'''.format(nombreE,apellidoE,dniE,fechaRegistroE,telefonoE,tipoE,permisoE)
-                    cursor.execute(sql)
-                    con.commit()
-                    resp = cursor.rowcount > 0
-                    return resp
-                except Exception as e:
-                    print(f'Error al agregar datos de Empleado: {e}')
-                finally:
-                    self.conexion_manager.desconectar(con, cursor)
+
+            ########
+            try:
+                con=self.conexion_manager.conectar()
+                con.autocommit=False
+                cursor=con.cursor()
+                sql='''INSERT INTO empleado (Nombre,Apellido,DNI,Telefono,Tipo,Permiso) VALUES('{}','{}','{}','{}','{}','{}')'''.format(nombreE,apellidoE,dniE,telefonoE,tipoE,permisoE)
+                cursor.execute(sql)
+                con.commit()
+                resp = cursor.rowcount > 0
+                return resp
+            except Exception as e:
+                print(f'Error al agregar datos de Empleado: {e}')
+            finally:
+                self.conexion_manager.desconectar(con, cursor)
             
     
     def mostrarDatosEmpleado(self):

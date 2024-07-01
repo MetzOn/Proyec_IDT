@@ -5,6 +5,7 @@ from Vista.GUILogin import LoginGUI
 from Controladores.ControladorPrincipal import PrincipalControlador
 from Modelo.DAOEmpleado import EmpleadoDAO
 from Modelo.DAOImagen import ImagenDAO
+from Modelo.DAOHistorial import HistorialDAO
 from Vista.GUIPrincipal import PrincipalGUI
 
 class LoginController:
@@ -31,7 +32,8 @@ class LoginController:
         principal_view = PrincipalGUI()
         model_empleado = EmpleadoDAO()
         model_imagen = ImagenDAO()
-        principal_controller = PrincipalControlador(principal_view, model_empleado, model_imagen)
+        model_historial=HistorialDAO()
+        principal_controller = PrincipalControlador(principal_view, model_empleado, model_imagen,model_historial)
         
         # Elimina la vista de inicio de sesión y agrega la vista principal
         self.view.page.clean()
