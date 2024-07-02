@@ -3,6 +3,9 @@ import cv2
 import imutils
 import numpy as np
 import time
+import base64
+from io import BytesIO
+from PIL import Image
 from Modelo.DAOEmpleado import EmpleadoDAO
 from Modelo.DTOEmpleado import EmpleadoDTO
 from Modelo.DAOImagen import ImagenDAO
@@ -40,7 +43,7 @@ class PrincipalControlador:
         self.view.btnModificarEmpleado.on_click=self.ActualizarEmpleado
         self.view.btnIniciarReconocimiento.on_click=self.Click_IniciarCamara
         self.view.btnListar.on_click=self.Click_ListarHistorial
-        self.view.btnGenerarInforme.on_click=self.Click_GenerarInforme()
+        self.view.btnGenerarInforme.on_click=self.Click_GenerarInforme
         self.selected_row = None
         self.EntrenarSistema()        
   
@@ -55,6 +58,7 @@ class PrincipalControlador:
     
 
     def Change_NavRegistroCrear(self,e):
+        self.limpiarCeldas()
         self.view.ContenedorRegistro.content=self.view.ContenedoresResgistro[0]
         self.view.update()
 
@@ -101,7 +105,7 @@ class PrincipalControlador:
                     self.finalizar_video() # Si se presiona la tecla 'Esc' (27 en ASCII), finaliza la visualización
                     break
         if self.nombre_guardado is not None and self.frame_guardado is not None:
-            self.mostrar_ventana_reconocimiento(self.nombre_guardado)
+            self.mostrar_ventana_reconocimiento(self.nombre_guardado,self.frame_guardado)
             
 
     # Finaliza la visualización del video
@@ -111,7 +115,6 @@ class PrincipalControlador:
         self.cap.release()  # Libera los recursos de la cámara
         cv2.destroyAllWindows() 
          # Cierra todas las ventanas de OpenCV
-
 
 
 
@@ -177,14 +180,14 @@ class PrincipalControlador:
             IdSospechoso=self.modelEmpleado.obtenerIDEmpleado(dni)
             for imagen in self.imagenes:
                 imagen.setIdE(IdSospechoso)
-                self.modelImagen.CrearImagenes(imagen)
-            print("Todo conforme, se subio") #COLOCAR VENTANA EMERGENTE   
+                self.modelImagen.CrearImagenes(imagen)  
             self.limpiarCeldas()
             self.EntrenarSistema()
             self.imagenes=[]
+            self.mostrar_ventana_dialogo(nombre,dni,"Empleado registrado correctamente")
             
         else:
-            print("DNI IGUALES") #COLOCAR VENTANA EMERGENTE
+            self.mostrar_ventana_dialogo(nombre,dni,"ERROR: El DNI ya esta registrado") #COLOCAR VENTANA EMERGENTE
         
     def limpiarCeldas (self):
         self.view.tfIdEmpleado.value=""
@@ -194,6 +197,7 @@ class PrincipalControlador:
         self.view.tfTelefonoEmpleado.value=""
         self.view.cbTipoEmpleado.value=""
         self.view.cbPermisoDIngreso.value=""
+
 
 
     def EntrenarSistema(self):
@@ -262,12 +266,16 @@ class PrincipalControlador:
     def EliminarEmpleado(self,e):
         self.view.tfIdEmpleado.disabled=False
         id=self.view.tfIdEmpleado.value
+        nombre=self.view.tfNombreEmpleado.value
+        dni=self.view.tfDniEmpleado.value
         self.view.tfIdEmpleado.disabled=True
         if not self.modelEmpleado.eliminarDatosEmpleado(id):
-            print("ELIMINADO CORRECTAMENTE")
+            self.mostrar_ventana_dialogo(nombre,dni,"Empleado eliminado correctamente")
             self.Click_ListarEmpleados()
             self.limpiarCeldas()
             self.EntrenarSistema() 
+        else:
+            self.mostrar_ventana_dialogo(nombre,dni,"ERROR: Datos no eliminados")
 
     def ActualizarEmpleado(self,e):
         self.view.tfIdEmpleado.disabled=False
@@ -281,9 +289,14 @@ class PrincipalControlador:
         tipoEmpleado=self.view.getTipoEmpleadoRegistro()
         empleado=EmpleadoDTO(id,nombre,apellido,dni,None,telefono,tipoEmpleado
                              ,permiso)
-        self.modelEmpleado.actualizarDatosEmpleado(empleado)
-        self.limpiarCeldas()
-        self.Click_ListarEmpleados()
+        if self.modelEmpleado.actualizarDatosEmpleado(empleado):
+            self.limpiarCeldas()
+            self.Click_ListarEmpleados()
+            self.mostrar_ventana_dialogo(nombre,dni,"Datos del empleado actualizados")
+        else:
+            self.mostrar_ventana_dialogo(nombre,dni,"ERROR los datos no fueron actualizados")
+
+        
     ##YA SE IDENTIFICA, Y TODO, SOLO DEBO IMPLEMENTAR LAS VENTANAS DE ALERTA, LA SECCION DE HISTORIAL, ALERTAS Y NA MAS CREO##
 
 
@@ -310,7 +323,36 @@ class PrincipalControlador:
                 self.nombre_detectado_actual = nombre_detectado
 
 
-    def mostrar_ventana_reconocimiento(self,nombre):
+    def mostrar_ventana_dialogo(self,nombre,dni,txt):
+        self.ventana_reconocimiento = ft.AlertDialog(
+            title=ft.Text(txt),
+            modal=True,
+            content=ft.Text(f"Nombre: {nombre} DNI: {dni}"),
+            actions=[
+                ft.ElevatedButton("OK", on_click=self.cerrar_dialogos)],
+            open=True
+        )
+
+        self.view.page.dialog = self.ventana_reconocimiento
+        self.view.page.update()
+        self.view.update()
+
+    def mostrar_ventana_Eliminado(self,nombre,dni):
+        self.ventana_reconocimiento = ft.AlertDialog(
+            title=ft.Text("Empleado eliminado correctamente"),
+            modal=True,
+            content=ft.Text(f"Nombre: {nombre} DNI: {dni}"),
+            actions=[
+                ft.ElevatedButton("OK", on_click=self.cerrar_dialogos)],
+            open=True
+        )
+
+        self.view.page.dialog = self.ventana_reconocimiento
+        self.view.page.update()
+        self.view.update()
+
+    def mostrar_ventana_reconocimiento(self,nombre,frame):
+
         self.ventana_reconocimiento = ft.AlertDialog(
             title=ft.Text("Empleado Detectado"),
             modal=True,
@@ -319,8 +361,29 @@ class PrincipalControlador:
                 ft.ElevatedButton("OK", on_click=self.cerrar_dialogo)],
             open=True
         )
+         #EXPERIMENTAL V1: NO SE SI ESTO FUNCIONARA, PERO CONVIERTE EL FRAME EN ALGO COMPATIBLE PARA SER MOSTRADO
+        frame_rgb=self.frame_to_base64(frame)
+
+        self.view.imagesReconocidos.controls.append(
+                ft.Image(
+                    src_base64=frame_rgb,
+                    fit=ft.ImageFit.NONE,
+                    repeat=ft.ImageRepeat.NO_REPEAT,
+                    border_radius=ft.border_radius.all(10),
+                )
+            )
+        #######################################################
         self.view.page.dialog = self.ventana_reconocimiento
         self.view.page.update()
+        self.view.update()
+
+    #EXPERIMENTAL V1:  CONVERTIR EL FRAME GUARDADO EN UNA IMAGEN BASE 64
+    def frame_to_base64(self,frame):
+        # Convertir el frame de BGR a RGB
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        image_base64 = base64.b64encode(rgb_frame.tobytes()).decode('utf-8')
+        return image_base64
+    ####################################################################
 
     #HISTORIAL
     def cerrar_dialogo(self, e):
@@ -336,6 +399,9 @@ class PrincipalControlador:
             print("Historial subido exitosamente")
         else:
             print("Error")
+    def cerrar_dialogos(self, e):
+        self.ventana_reconocimiento.open = False
+        self.view.page.update()
 
     def Click_ListarHistorial(self,e): 
         self.view.tbHistorialEmpleados.rows=[]
@@ -355,7 +421,7 @@ class PrincipalControlador:
             )
         self.view.update()
 
-    #ANALISIS DE DATOS Y GENERACION DE INFORME:
+    #EXPERIMENTAL V0: ANALISIS DE DATOS Y GENERACION DE INFORME:
     def Click_GenerarInforme(self,e):
         data=Data()
         historial=data.get_historial()

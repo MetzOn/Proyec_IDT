@@ -103,7 +103,7 @@ class PrincipalGUI(ft.UserControl):
             expand=True,
             column_spacing=1,
             border= ft.border.all(2,self.ColorFondoA),
-            data_row_color={ft.MaterialState.SELECTED:"purple",
+            data_row_color={ft.MaterialState.SELECTED:"#5899E2",
                             ft.MaterialState.PRESSED:"black"},
             border_radius=10,
             show_checkbox_column=True,
@@ -209,6 +209,15 @@ class PrincipalGUI(ft.UserControl):
             content=self.ContenedoresResgistro[0],
         )
 
+        #VER IMAGENES DE LOS IDENTIFICADOS EN EL DIA
+        self.imagesReconocidos = ft.GridView(
+        expand=1,
+        runs_count=5,
+        max_extent=150,
+        child_aspect_ratio=1.0,
+        spacing=5,
+        run_spacing=5,
+    )
    
         #PANELES PRINCIPALES (implementacion de componentes)
         #Navegacion
@@ -296,25 +305,8 @@ class PrincipalGUI(ft.UserControl):
                        
                         ft.Container(
                             padding=20,
-                            
                             alignment=ft.alignment.center,
-                            content=(
-                                ft.Column(
-                                    alignment=ft.MainAxisAlignment.CENTER,
-                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                                    controls=[
-                                        ft.Text(
-                                            value="Finalizar Video",
-                                            font_family="Arial",
-                                            size=14,
-                                            weight=500
-                                        ),
-                                        self.btnFinalizarVideo,
-                                    ]
-                                )
-                            )
-                            
-
+                            content=self.imagesReconocidos
                         ),
 
                     ]

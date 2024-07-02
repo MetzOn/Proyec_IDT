@@ -102,7 +102,6 @@ class EmpleadoDAO():
         return resp
             
     def actualizarDatosEmpleado(self,empleado):
-        resp =None
         con=None
         cursor=None
         if isinstance(empleado, EmpleadoDTO):
@@ -118,17 +117,20 @@ class EmpleadoDAO():
             con=self.conexion_manager.conectar()
             con.autocommit=False
             cursor=con.cursor()
-            sql='''UPDATE empleado SET Nombre ='{}',Apellido = '{}',DNI = '{}',Telefono = '{}',Tipo = '{}',Permiso = '{}' WHERE id_m= '{}' '''.format(nombreE,apellidoE,dniE,telefonoE,tipoE,permisoE,idE)
+            sql='''UPDATE empleado SET Nombre ='{}',Apellido = '{}',DNI = '{}',Telefono = '{}',Tipo = '{}',Permiso = '{}' WHERE IdEmpleado= '{}' '''.format(nombreE,apellidoE,dniE,telefonoE,tipoE,permisoE,idE)
             resp=cursor.execute(sql)
             dato=cursor.rowcount
             con.commit()
-            return dato
+            if dato>0:
+                return True
+            else:
+                return False
         except Exception as e:
             print(f'Error al actualizar datos: {e}')
-            resp =False
+            return False
         finally:
             self.conexion_manager.desconectar(con, cursor)
-        return resp
+        
     
     def obtenerIDEmpleado(self,dni):
         resp =None

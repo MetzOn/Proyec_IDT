@@ -37,15 +37,15 @@ class LoginController:
         
         # Elimina la vista de inicio de sesión y agrega la vista principal
         self.view.page.clean()
-        self.view.page.window_min_height=820
-        self.view.page.window_min_width=1100
+        self.view.page.window_height=820
+        self.view.page.window_width =1100
         self.view.page.theme_mode=ft.ThemeMode.SYSTEM
         self.view.page.add(principal_view)
         self.view.page.update()
         principal_controller.run()
 
     def run(self):
-        ft.app(target=self.main)
+        ft.app(target=self.main,assets_dir="assets")
 
     def main(self, page: ft.Page):
         
