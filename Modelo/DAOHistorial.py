@@ -28,7 +28,6 @@ class HistorialDAO:
                 self.conexion_manager.desconectar(con, cursor)
             return resp
     
-    ##REVISAAAAA
     def mostrarDatosH(self):
         con = None
         cursor = None

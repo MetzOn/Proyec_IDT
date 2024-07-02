@@ -9,7 +9,11 @@ from Modelo.DAOImagen import ImagenDAO
 from Modelo.DTOImagen import ImagenDTO
 from Modelo.DAOHistorial import HistorialDAO
 from Modelo.DTOHistorial import HistorialDTO
+from Modelo.IANserviceOpenIa import OpenIaInspector
+from Modelo.IANanalysisData import Data
+from Modelo.IANgenerateUUID import generate_random_id
 from Vista.GUIPrincipal import PrincipalGUI
+
 
 class PrincipalControlador:
     def __init__(self, view: PrincipalGUI, EmpleadoDao: EmpleadoDAO,ImagenDao: ImagenDAO,HistorialDao: HistorialDAO):
@@ -35,6 +39,8 @@ class PrincipalControlador:
         self.view.btnEliminarEmpleado.on_click=self.EliminarEmpleado
         self.view.btnModificarEmpleado.on_click=self.ActualizarEmpleado
         self.view.btnIniciarReconocimiento.on_click=self.Click_IniciarCamara
+        self.view.btnListar.on_click=self.Click_ListarHistorial
+        self.view.btnGenerarInforme.on_click=self.Click_GenerarInforme()
         self.selected_row = None
         self.EntrenarSistema()        
   
@@ -331,7 +337,7 @@ class PrincipalControlador:
         else:
             print("Error")
 
-    def Click_ListarHistorial(self): 
+    def Click_ListarHistorial(self,e): 
         self.view.tbHistorialEmpleados.rows=[]
 
         Historial= self.modelHistorial.mostrarDatosH()
@@ -342,15 +348,22 @@ class PrincipalControlador:
                         ft.DataCell(ft.Text(str(historial.getFechaH()))),
                         ft.DataCell(ft.Text(historial.getHoraH())),
                         ft.DataCell(ft.Text(historial.getNombre())),
-                        ft.DataCell(ft.Text(historial.getDniE())),
                         ft.DataCell(ft.Text(historial.getDni())),
-                        ft.DataCell(ft.Text(historial.getIdH())),
+                        ft.DataCell(ft.Text(historial.getIdE())),
                     ]
                 )
             )
         self.view.update()
 
-
+    #ANALISIS DE DATOS Y GENERACION DE INFORME:
+    def Click_GenerarInforme(self,e):
+        data=Data()
+        historial=data.get_historial()
+        list_porcentaje_asistencia=data.get_percentage_assist(historial)
+        gpt=OpenIaInspector(list_porcentaje_asistencia)
+        text_gpt=gpt.get_gpt_response()
+        myuuid=generate_random_id()
+        data.create_word(list_porcentaje_asistencia,text_gpt,f"{myuuid}-informacion")
 
     def run(self):
         self.view.page.update()

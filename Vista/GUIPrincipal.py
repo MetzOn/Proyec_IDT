@@ -84,6 +84,15 @@ class PrincipalGUI(ft.UserControl):
         self.btnAdministrarEmpleadosPanel=ft.ElevatedButton(icon=ft.icons.TABLE_VIEW,text="Administrar empleados",col={'md': 6, 'lg': 3})
         self.btnModificarEmpleado=ft.ElevatedButton(icon=ft.icons.UPDATE,text="Actualizar",col={'md': 6, 'lg': 3},)
         self.btnEliminarEmpleado=ft.ElevatedButton(icon=ft.icons.DELETE,text="Eliminar",col={'md': 6, 'lg': 3},)
+        #Historial
+        self.btnListar=ft.IconButton(tooltip="Listar",
+                                                  icon=ft.icons.FORMAT_LIST_BULLETED_OUTLINED,
+                                                  icon_color="white")
+
+        self.btnGenerarInforme=ft.IconButton(tooltip="Descargar en Informe",
+                                                  icon=ft.icons.SAVE_ALT,
+                                                  icon_color="white")
+
         #Ventanas emergentes
         self.VentanaEmergente = ft.AlertDialog()
 
@@ -431,11 +440,9 @@ class PrincipalGUI(ft.UserControl):
                                     alignment=ft.MainAxisAlignment.CENTER,
                                     controls=[ 
                                         self.buscarEmpleado,
-                                        ft.IconButton(tooltip="Descargar en Excel",
-                                                  icon=ft.icons.SAVE_ALT,
-                                                  icon_color="white"
-
-                                    )]
+                                        self.btnGenerarInforme,
+                                        self.btnListar
+                                                  ]
                                 ),
                                 ft.Column(
                                     expand=True,
