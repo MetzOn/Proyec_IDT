@@ -45,6 +45,11 @@ class PrincipalControlador:
         self.view.btnListar.on_click=self.Click_ListarHistorial
         self.view.btnGenerarInforme.on_click=self.Click_GenerarInforme
         self.selected_row = None
+        self.ventana_carga= ft.AlertDialog(
+            title=ft.Text("Espere por favor"),
+            modal=True,
+            content=ft.Text("Procesando..."),
+        )
         self.EntrenarSistema()        
   
     #NAVEGACION 
@@ -71,7 +76,9 @@ class PrincipalControlador:
         self.tiempo_inicio_nombre=None
 
         self.faceClassif = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        self.mostarVentanaCarga(True)
         self.face_recognizer.read('ModeloFacesFrontalData2024.xml')
+        self.mostarVentanaCarga(False)
         self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW) 
         while True:  # Bucle infinito para mantener la visualización continua
             ret, frame = self.cap.read()  # Captura un frame de video
@@ -105,7 +112,7 @@ class PrincipalControlador:
                     self.finalizar_video() # Si se presiona la tecla 'Esc' (27 en ASCII), finaliza la visualización
                     break
         if self.nombre_guardado is not None and self.frame_guardado is not None:
-            self.mostrar_ventana_reconocimiento(self.nombre_guardado,self.frame_guardado)
+            self.mostrar_ventana_reconocimiento(self.nombre_guardado)
             
 
     # Finaliza la visualización del video
@@ -164,6 +171,7 @@ class PrincipalControlador:
         return self.imagenes
 
     def Click_videoRegistroCrearEmpleado(self,e):
+        self.mostarVentanaCarga(True)
         nombre=self.view.getNombreRegistro()
         apellido=self.view.getApellidoRegistro()
         dni=self.view.getDniRegistro()
@@ -182,13 +190,22 @@ class PrincipalControlador:
                 imagen.setIdE(IdSospechoso)
                 self.modelImagen.CrearImagenes(imagen)  
             self.limpiarCeldas()
+            
+            
             self.EntrenarSistema()
+            self.mostarVentanaCarga(False)
+            
             self.imagenes=[]
             self.mostrar_ventana_dialogo(nombre,dni,"Empleado registrado correctamente")
             
         else:
             self.mostrar_ventana_dialogo(nombre,dni,"ERROR: El DNI ya esta registrado") #COLOCAR VENTANA EMERGENTE
-        
+    def mostarVentanaCarga(self,a):
+        self.ventana_carga.open=a
+        self.view.page.dialog = self.ventana_carga
+        self.view.page.update()
+        self.view.update()
+
     def limpiarCeldas (self):
         self.view.tfIdEmpleado.value=""
         self.view.tfApellidosEmpleado.value=""
@@ -208,6 +225,11 @@ class PrincipalControlador:
             return None
         
         self.etiqueta_sospechoso_mapping = {etiqueta: nombre for nombre, etiqueta in self.Diccionario.items()}
+        #TENGO QUE HACER QUE POR EL INDICADOR Y EL DNI SE VEA SI LA PERSONA TIENE PERMISO PARA INGRESAR, ME QUEDE AQUI 
+        ##############
+        #################
+        ##############
+        ##############
         self.dni_Empleado_mapping = {current_label: dni for dni, current_label in self.Diccionario_dni.items()}
         print("Diccionario de entrenamiento:", self.etiqueta_sospechoso_mapping)
 
@@ -337,21 +359,18 @@ class PrincipalControlador:
         self.view.page.update()
         self.view.update()
 
-    def mostrar_ventana_Eliminado(self,nombre,dni):
+    def mostrar_ventana_Cargando(self,nombre,dni):
         self.ventana_reconocimiento = ft.AlertDialog(
-            title=ft.Text("Empleado eliminado correctamente"),
+            title=ft.Text("Espere por favor"),
             modal=True,
-            content=ft.Text(f"Nombre: {nombre} DNI: {dni}"),
-            actions=[
-                ft.ElevatedButton("OK", on_click=self.cerrar_dialogos)],
-            open=True
+            content=ft.Text("Procesando..."),
         )
 
         self.view.page.dialog = self.ventana_reconocimiento
         self.view.page.update()
         self.view.update()
 
-    def mostrar_ventana_reconocimiento(self,nombre,frame):
+    def mostrar_ventana_reconocimiento(self,nombre):
 
         self.ventana_reconocimiento = ft.AlertDialog(
             title=ft.Text("Empleado Detectado"),
@@ -361,18 +380,6 @@ class PrincipalControlador:
                 ft.ElevatedButton("OK", on_click=self.cerrar_dialogo)],
             open=True
         )
-         #EXPERIMENTAL V1: NO SE SI ESTO FUNCIONARA, PERO CONVIERTE EL FRAME EN ALGO COMPATIBLE PARA SER MOSTRADO
-        frame_rgb=self.frame_to_base64(frame)
-
-        self.view.imagesReconocidos.controls.append(
-                ft.Image(
-                    src_base64=frame_rgb,
-                    fit=ft.ImageFit.NONE,
-                    repeat=ft.ImageRepeat.NO_REPEAT,
-                    border_radius=ft.border_radius.all(10),
-                )
-            )
-        #######################################################
         self.view.page.dialog = self.ventana_reconocimiento
         self.view.page.update()
         self.view.update()
@@ -423,6 +430,7 @@ class PrincipalControlador:
 
     #EXPERIMENTAL V0: ANALISIS DE DATOS Y GENERACION DE INFORME:
     def Click_GenerarInforme(self,e):
+        self.mostarVentanaCarga(True)
         data=Data()
         historial=data.get_historial()
         list_porcentaje_asistencia=data.get_percentage_assist(historial)
@@ -430,6 +438,7 @@ class PrincipalControlador:
         text_gpt=gpt.get_gpt_response()
         myuuid=generate_random_id()
         data.create_word(list_porcentaje_asistencia,text_gpt,f"{myuuid}-informacion")
+        self.mostarVentanaCarga(False)
 
     def run(self):
         self.view.page.update()

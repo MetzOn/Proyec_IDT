@@ -2,9 +2,9 @@ import flet as ft
 
 class LoginGUI:
     def __init__(self):
-        self.username_field = ft.TextField(width=280, height=40, hint_text='Username', border='underline', color='#303030', prefix_icon=ft.icons.EMAIL)
-        self.password_field = ft.TextField(width=280, height=40, hint_text='Password', border='underline', color='#303030', prefix_icon=ft.icons.LOCK)
-        self.sign_in_button = ft.ElevatedButton(content=ft.Text("SIGN IN", color='white', weight=ft.FontWeight.W_500), width=280, bgcolor='black')
+        self.username_field = ft.TextField(width=280, height=40, hint_text='Usuario', border='underline', color='#303030', prefix_icon=ft.icons.EMAIL)
+        self.password_field = ft.TextField(width=280, height=40, hint_text='Contraseña', border='underline', color='#303030',  password=True, can_reveal_password=True ,prefix_icon=ft.icons.LOCK)
+        self.sign_in_button = ft.ElevatedButton(content=ft.Text("Iniciar Sesion", color='white', weight=ft.FontWeight.W_500), width=280, bgcolor='black')
         self.body = self.build_body()
 
     def build_body(self):
@@ -21,22 +21,15 @@ class LoginGUI:
                     ft.Container(
                         ft.Container(
                             ft.Column([
-                                ft.Container(
-                                    ft.Image(
-                                        src='user.png',
-                                        width=60,
-                                    ),
-                                    padding=ft.padding.only(150, 20),
-                                ),
                                 ft.Text(
-                                    "Sign in",
+                                    "Inicar Sesión",
                                     width=360,
                                     size=30,
                                     weight=ft.FontWeight.W_900,
                                     text_align='center',
                                 ),
                                 ft.Text(
-                                    "Please login to use the platform",
+                                    "Por favor, inicia sesion para ingresar al sistema",
                                     width=360,
                                     text_align='center',
                                 ),
@@ -48,33 +41,34 @@ class LoginGUI:
                                     self.password_field,
                                     padding=ft.padding.only(40, 10),
                                 ),
-                                ft.Container(
-                                    ft.TextButton(
-                                        "I forgot my password",
-                                    ),
-                                    padding=ft.padding.only(40),
-                                ),
+                                
                                 ft.Container(
                                     self.sign_in_button,
                                     padding=ft.padding.only(40, 10)
                                 ),
                                 ft.Container(
-                                    ft.Row([
+                                    ft.Column(
+                                        alignment=ft.CrossAxisAlignment.CENTER,
+                                        controls=[
                                         ft.Text(
-                                            "Don't have an account?",
+                                            "¿Olvidaste la contraseña?",
                                         ),
                                         ft.TextButton(
-                                            "Create a free account."
+                                            "Comunicate con el encargado"
                                         ),
                                     ], spacing=0),
                                     padding=ft.padding.only(40),
                                 ),
-                            ]),
+                                
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER),
+                            alignment= ft.alignment.center,
                         ),
                         width=360,
                         height=560,
                         bgcolor='#22ffffff',
                         border_radius=11,
+                        
                     ),
                 ]),
                 padding=110,
