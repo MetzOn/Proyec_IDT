@@ -31,7 +31,8 @@ class PrincipalControlador:
         self.nombre_detectado_actual=None
         self.tiempo_inicio_nombre=None
         self.nombre_guardado=None
-        self.frame_guardado=None
+        self.dni_guardado=None
+        
         self.indicador_guardado=None
         self.video_pausado = False
         self.face_recognizer= cv2.face.LBPHFaceRecognizer_create()
@@ -70,7 +71,7 @@ class PrincipalControlador:
     #RECONOCIMIENTO VIDEO CAP
     def Click_IniciarCamara(self, e):
         self.nombre_guardado=None
-        self.frame_guardado=None
+        
         self.indicador_guardado=None
         self.nombre_detectado_actual=None
         self.tiempo_inicio_nombre=None
@@ -89,17 +90,19 @@ class PrincipalControlador:
 
                 for (x, y, w, h) in faces:  # Itera sobre las coordenadas de las caras detectadas
                     rostro = auxFrame[y:y + h, x:x + w]  # Recorta la región de la cara
-                    rostro = cv2.resize(rostro, (300, 300), interpolation=cv2.INTER_CUBIC)  # Redimensiona la cara
+                    rostro = cv2.resize(rostro, (500, 500), interpolation=cv2.INTER_CUBIC)  # Redimensiona la cara
                     result = self.face_recognizer.predict(rostro)  # Realiza el reconocimiento facial en la cara
                         
-                    if result[1] < 65:  # Si la confianza en el reconocimiento es alta
+                    if result[1] < 30:  # Si la confianza en el reconocimiento es alta
                         nombre = self.etiqueta_sospechoso_mapping.get(result[0], "No encontrado")  # Obtiene el nombre correspondiente a la etiqueta
+                        dni=self.dni_Empleado_mapping.get(result[0])
                         if nombre != "No encontrado":
                                 name = nombre
-                                self.procesar_nombre(name,frame,result[0])
+                                self.procesar_nombre(name,dni,result[0])
                                 
                         else:
                                 name=nombre
+                                self.nombre_guardado=""
                     else:  # Si la confianza en el reconocimiento es baja
                         name = "Desconocido"
                     info_text = f"{name} ({result[1]:.2f})"
@@ -108,11 +111,13 @@ class PrincipalControlador:
 
                 cv2.imshow('Reconocimiento Facial', frame)  # Muestra el frame con las caras detectadas
                 key = cv2.waitKey(1)  # Espera 1 milisegundo por la pulsación de una tecla
-                if key == 27 or (self.nombre_guardado is not None and self.frame_guardado is not None): 
+                if key == 27 or (self.nombre_guardado is not None): 
                     self.finalizar_video() # Si se presiona la tecla 'Esc' (27 en ASCII), finaliza la visualización
                     break
-        if self.nombre_guardado is not None and self.frame_guardado is not None:
-            self.mostrar_ventana_reconocimiento(self.nombre_guardado)
+        if self.nombre_guardado is not None:
+            empleado=self.modelEmpleado.obtenerEmpleadoxDni(self.dni_guardado)
+            
+            self.mostrar_ventana_reconocimiento(empleado)
             
 
     # Finaliza la visualización del video
@@ -129,6 +134,7 @@ class PrincipalControlador:
     #REGISTRO
     def Click_videoRegistroTomarImagenes(self,e):
         self.imagenes=[]
+        print(self.imagenes)
         self.view.btnTomarImagenes.disabled=True
         self.view.btnFinalizarVideo.disabled=False
         faceClassif = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -148,7 +154,7 @@ class PrincipalControlador:
                 for (x, y, w, h) in faces:
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Dibuja un rectángulo alrededor de cada rostro
                     rostro = auxFrame[y:y + h, x:x + w]  # Recorta la región del rostro
-                    rostro = cv2.resize(rostro, (300, 300), interpolation=cv2.INTER_CUBIC)  # Redimensiona el rostro a 150x150 píxeles
+                    rostro = cv2.resize(rostro, (500, 500), interpolation=cv2.INTER_CUBIC)  # Redimensiona el rostro a  píxeles
 
                     imagen = ImagenDTO()
                     imagen.setNombreI('Rostro_{}.jpg'.format(count))
@@ -159,7 +165,7 @@ class PrincipalControlador:
                     print(count)
             cv2.imshow('frame', frame)  # Muestra el frame con los rectángulos dibujados
             k = cv2.waitKey(1)
-            if k == 27 or count >= 15:  # Permite presionar esc para salir de la toma de datos, o se finaliza con 300 imagenes capturadas
+            if k == 27 or count >= 20:  # Permite presionar esc para salir de la toma de datos, o se finaliza con 300 imagenes capturadas
                 break
             frame_counter += 1 
         self.cap.release()
@@ -328,7 +334,7 @@ class PrincipalControlador:
         return
 
 
-    def procesar_nombre(self, nombre_detectado,frame,indicador_dni):
+    def procesar_nombre(self, nombre_detectado,dni_detectado,indicador_dni):
             if self.nombre_detectado_actual == nombre_detectado:
                 # Si el nombre es el mismo que el detectado previamente, incrementa el temporizador
                 tiempo_actual = time.time()
@@ -337,7 +343,7 @@ class PrincipalControlador:
                 elif tiempo_actual - self.tiempo_inicio_nombre >= 4:
                     # Si el temporizador ha alcanzado los 2 segundos, guarda el nombre
                     self.nombre_guardado = nombre_detectado
-                    self.frame_guardado=frame
+                    self.dni_guardado=dni_detectado
                     self.indicador_guardado=indicador_dni
             else:
                 # Si el nombre es diferente, reinicia el temporizador y almacena el nuevo nombre
@@ -358,24 +364,20 @@ class PrincipalControlador:
         self.view.page.dialog = self.ventana_reconocimiento
         self.view.page.update()
         self.view.update()
+    
 
-    def mostrar_ventana_Cargando(self,nombre,dni):
-        self.ventana_reconocimiento = ft.AlertDialog(
-            title=ft.Text("Espere por favor"),
-            modal=True,
-            content=ft.Text("Procesando..."),
-        )
-
-        self.view.page.dialog = self.ventana_reconocimiento
-        self.view.page.update()
-        self.view.update()
-
-    def mostrar_ventana_reconocimiento(self,nombre):
-
+    def mostrar_ventana_reconocimiento(self, empleado: EmpleadoDTO):
+         
+        n=self.modelEmpleado.verificarPermisoxDNI(empleado.getDniE())
+        print(n)
+        if n==1:
+            text="{} : El empleado tiene permiso \n para ingresar al establecimiento".format(empleado.getNombreE())
+        else :
+            text="{} : El empleado no tiene permiso \n para ingresar al establecimiento".format(empleado.getNombreE())
         self.ventana_reconocimiento = ft.AlertDialog(
             title=ft.Text("Empleado Detectado"),
             modal=True,
-            content=ft.Text(f"Nombre: {nombre}"),
+            content=ft.Text(text),
             actions=[
                 ft.ElevatedButton("OK", on_click=self.cerrar_dialogo)],
             open=True
@@ -384,13 +386,6 @@ class PrincipalControlador:
         self.view.page.update()
         self.view.update()
 
-    #EXPERIMENTAL V1:  CONVERTIR EL FRAME GUARDADO EN UNA IMAGEN BASE 64
-    def frame_to_base64(self,frame):
-        # Convertir el frame de BGR a RGB
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image_base64 = base64.b64encode(rgb_frame.tobytes()).decode('utf-8')
-        return image_base64
-    ####################################################################
 
     #HISTORIAL
     def cerrar_dialogo(self, e):

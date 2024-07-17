@@ -192,4 +192,60 @@ class EmpleadoDAO():
             return None
         finally:
             self.conexion_manager.desconectar(con, cursor)
-    
+
+    def verificarPermisoxDNI(self,dni):
+        con=None
+        cursor=None
+        try:
+            con=self.conexion_manager.conectar()
+            con.autocommit=False
+            cursor=con.cursor()
+            sql = '''SELECT * FROM empleado WHERE DNI ='{}' '''.format(dni)
+            cursor.execute(sql)
+            resultado = cursor.fetchone()
+            permiso = resultado[7]
+            con.commit()
+            return permiso
+        except Exception as e:
+            print("Error al obtener el permiso del empleado:", e)
+            return None
+        finally:
+            self.conexion_manager.desconectar(con, cursor)
+
+    def obtenerEmpleadoxDni(self,dni):
+        con=None
+        cursor=None
+        try:
+            con=self.conexion_manager.conectar()
+            con.autocommit=False
+            cursor=con.cursor()
+            sql = '''SELECT * FROM empleado WHERE DNI ='{}' '''.format(dni)
+            cursor.execute(sql)
+            resultado = cursor.fetchone()
+            con.commit()
+            if resultado:
+                idE=resultado[0]
+                nombreE=resultado[1]
+                apellidoE=resultado[2]
+                dniE=resultado[3]
+                fechaRegistroE=resultado[4]
+                telefonoE=resultado[5]
+                tipoE=resultado[6]
+                permisoE=resultado[7]
+                empleado = EmpleadoDTO()
+                empleado.setIdE(idE)
+                empleado.setNombreE(nombreE)
+                empleado.setApellidoE(apellidoE)
+                empleado.setDniE(dniE)
+                empleado.setFechaRegistroE(fechaRegistroE)
+                empleado.setTelefonoE(telefonoE)
+                empleado.setTipoE(tipoE)
+                empleado.setPermisoE(permisoE)
+                return empleado
+            else:
+                return None
+        except Exception as e:
+            print("Error al obtener el empleado por ID:", e)
+            return None
+        finally:
+            self.conexion_manager.desconectar(con, cursor)
